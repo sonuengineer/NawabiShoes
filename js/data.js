@@ -476,11 +476,11 @@ const StorageManager = {
   // --- Seed Default Admin ---
   seedAdmin() {
     const users = this.getUsers();
-    if (!users.find(u => u.email === 'admin@solecraft.com')) {
+    if (!users.find(u => u.isAdmin)) {
       users.push({
         id: 'admin_1',
         name: 'Admin',
-        email: 'admin@solecraft.com',
+        email: 'admin@nawabisshoes.com',
         password: 'admin123',
         phone: '',
         address: '',

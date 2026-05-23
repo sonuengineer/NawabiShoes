@@ -14,14 +14,7 @@ const AdminApp = {
     // Check if user is admin
     const user = Auth.getCurrentUser();
     if (!user || !user.isAdmin) {
-      document.getElementById('adminContent').innerHTML = `
-        <div style="text-align:center;padding:4rem 2rem;">
-          <i class="fas fa-shield-alt" style="font-size:4rem;color:var(--text-muted);margin-bottom:1rem;"></i>
-          <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;">Access Denied</h2>
-          <p style="color:var(--text-muted);margin-bottom:2rem;">You need admin privileges to access this panel.</p>
-          <a href="index.html" class="btn btn-primary">← Back to Store</a>
-        </div>
-      `;
+      this._showAdminLogin();
       return;
     }
 
@@ -403,6 +396,91 @@ const AdminApp = {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
     }, 3000);
+  },
+
+  // =========================================================================
+  // ADMIN LOGIN SCREEN
+  // =========================================================================
+  _showAdminLogin() {
+    // Hide sidebar, show a centred login card
+    const sidebar = document.getElementById('adminSidebar');
+    const main    = document.querySelector('.admin-main');
+    if (sidebar) sidebar.style.display = 'none';
+    if (main)    main.style.cssText = 'margin-left:0;width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 100%)';
+
+    document.getElementById('adminContent').innerHTML = `
+      <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:3rem 2.5rem;max-width:400px;width:100%;box-shadow:0 40px 80px rgba(0,0,0,0.4);">
+        <div style="text-align:center;margin-bottom:2rem;">
+          <div style="font-size:2rem;font-weight:900;background:linear-gradient(135deg,#d4a04d,#e8c46a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.03em;">NawabiShoes</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:0.7rem;letter-spacing:0.22em;text-transform:uppercase;margin-top:0.3rem;">Admin Portal</div>
+        </div>
+
+        <div style="margin-bottom:1.2rem;">
+          <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.5rem;">Email</label>
+          <input id="adminLoginEmail" type="email" value="admin@nawabisshoes.com"
+            style="width:100%;padding:0.85rem 1rem;border-radius:12px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:0.95rem;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#d4a04d'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+            onkeydown="if(event.key==='Enter')AdminApp._handleAdminLogin()">
+        </div>
+
+        <div style="margin-bottom:1.8rem;">
+          <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.5rem;">Password</label>
+          <input id="adminLoginPassword" type="password" value="admin123"
+            style="width:100%;padding:0.85rem 1rem;border-radius:12px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:0.95rem;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#d4a04d'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+            onkeydown="if(event.key==='Enter')AdminApp._handleAdminLogin()">
+        </div>
+
+        <div id="adminLoginError" style="display:none;color:#fc8181;font-size:0.85rem;margin-bottom:1rem;padding:0.7rem 1rem;background:rgba(245,101,101,0.12);border-radius:10px;border:1px solid rgba(245,101,101,0.25);"></div>
+
+        <button onclick="AdminApp._handleAdminLogin()"
+          style="width:100%;padding:1rem;border-radius:14px;background:linear-gradient(135deg,#d4a04d,#9a7030);color:white;border:none;cursor:pointer;font-weight:700;font-size:1rem;letter-spacing:0.04em;transition:all 0.3s;"
+          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 30px rgba(212,160,77,0.4)'"
+          onmouseout="this.style.transform='';this.style.boxShadow=''">
+          Sign In to Admin
+        </button>
+
+        <div style="text-align:center;margin-top:1.5rem;">
+          <a href="index.html" style="color:rgba(255,255,255,0.35);font-size:0.82rem;text-decoration:none;transition:color 0.2s;"
+            onmouseover="this.style.color='#d4a04d'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
+            ← Back to Store
+          </a>
+        </div>
+      </div>
+    `;
+
+    // Override topbar title
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.textContent = 'Admin Login';
+  },
+
+  _handleAdminLogin() {
+    const email    = document.getElementById('adminLoginEmail')?.value.trim();
+    const password = document.getElementById('adminLoginPassword')?.value;
+    const errorEl  = document.getElementById('adminLoginError');
+
+    const result = Auth.login(email, password);
+
+    if (!result.success) {
+      errorEl.textContent = result.message;
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    if (!result.user.isAdmin) {
+      Auth.logout();
+      errorEl.textContent = 'This account does not have admin privileges.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    // Restore layout and boot admin
+    const sidebar = document.getElementById('adminSidebar');
+    const main    = document.querySelector('.admin-main');
+    if (sidebar) sidebar.style.display = '';
+    if (main)    main.style.cssText = '';
+    this.showPage('dashboard');
+    this.updateAdminInfo();
   },
 
   // =========================================================================
