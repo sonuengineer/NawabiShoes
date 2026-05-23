@@ -475,8 +475,13 @@ const StorageManager = {
 
   // --- Seed Default Admin ---
   seedAdmin() {
-    const users = this.getUsers();
-    if (!users.find(u => u.isAdmin)) {
+    let users = this.getUsers();
+
+    // Remove any old-brand admin accounts
+    users = users.filter(u => !(u.isAdmin && u.email !== 'admin@nawabisshoes.com'));
+
+    // Always ensure the current admin exists
+    if (!users.find(u => u.email === 'admin@nawabisshoes.com')) {
       users.push({
         id: 'admin_1',
         name: 'Admin',
@@ -487,8 +492,9 @@ const StorageManager = {
         isAdmin: true,
         createdAt: new Date().toISOString()
       });
-      this.saveUsers(users);
     }
+
+    this.saveUsers(users);
   }
 };
 
