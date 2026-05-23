@@ -65,25 +65,28 @@ const App = {
     const navLinks = document.querySelector('.nav-links');
     if (!btn || !navLinks) return;
 
+    const closeNav = () => {
+      navLinks.classList.remove('mobile-open');
+      btn.classList.remove('open');
+      document.body.classList.remove('nav-open');
+    };
+
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const open = navLinks.classList.toggle('mobile-open');
       btn.classList.toggle('open', open);
+      document.body.classList.toggle('nav-open', open);
     });
 
     // Close on link click
     navLinks.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        navLinks.classList.remove('mobile-open');
-        btn.classList.remove('open');
-      });
+      a.addEventListener('click', closeNav);
     });
 
-    // Close on outside tap
+    // Close on outside tap (including backdrop overlay)
     document.addEventListener('click', (e) => {
       if (!btn.contains(e.target) && !navLinks.contains(e.target)) {
-        navLinks.classList.remove('mobile-open');
-        btn.classList.remove('open');
+        closeNav();
       }
     });
   },

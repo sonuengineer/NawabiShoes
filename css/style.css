@@ -1280,8 +1280,6 @@ ul {
   margin-top: 0.8rem;
 }
 
-}
-
 /* Checkout Button */
 .checkout-btn {
   width: 100%;
@@ -2117,141 +2115,35 @@ ul {
 /* --- Responsive Design --- */
 
 /* Tablet */
+/* Admin panel responsive — kept here, store breakpoints handled in MOBILE RESPONSIVE section below */
 @media (max-width: 1024px) {
-  .hero-container {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-  
-  .hero-content p {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .hero-buttons {
-    justify-content: center;
-  }
-  
-  .features-bar {
-    grid-template-columns: 1fr 1fr;
-  }
-  
   .admin-sidebar {
     transform: translateX(-100%);
   }
-  
   .admin-sidebar.open {
     transform: translateX(0);
   }
-  
   .admin-main {
     margin-left: 0;
   }
-  
   .admin-mobile-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
-  .footer-content {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
-/* Mobile */
 @media (max-width: 768px) {
-  .nav-links {
-    display: none;
-  }
-  
-  .mobile-menu-btn {
-    display: flex;
-  }
-  
-  .features-bar {
-    grid-template-columns: 1fr;
-  }
-  
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .products-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .footer-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .hero-badge {
-    display: none;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .hero {
-    min-height: auto;
-    padding-top: 6rem;
-  }
-
-  .cta-container h2 {
-    font-size: 1.8rem;
-  }
-
-  .newsletter-form {
-    flex-direction: column;
-  }
-  
-  .profile-card {
-    padding: 1.5rem;
-  }
-
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
-  }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .form-row   { grid-template-columns: 1fr; }
+  .profile-card { padding: 1.5rem; }
+  .profile-header { flex-direction: column; text-align: center; }
+  .cta-container h2 { font-size: 1.8rem; }
 }
 
-/* Small Mobile */
 @media (max-width: 480px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .cart-sidebar {
-    max-width: 100%;
-  }
-  
-  .auth-modal {
-    padding: 1.5rem;
-  }
-
-  .admin-main {
-    padding: 1rem;
-  }
-
-  .payment-methods {
-    gap: 0.8rem;
-  }
-  
-  .payment-icon {
-    width: 70px;
-    height: 45px;
-    font-size: 0.8rem;
-  }
+  .stats-grid  { grid-template-columns: 1fr; }
+  .admin-main  { padding: 1rem; }
 }
 
 /* --- Animations --- */
@@ -3546,6 +3438,11 @@ body.nav-open::after {
     white-space: nowrap;
   }
 
+  /* ── Hero image: remove 3D perspective tilt (looks skewed when centered) ── */
+  .hero-image-wrapper img {
+    transform: none !important;
+  }
+
   /* ── Product grid: 2-col on 768 ── */
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -3557,7 +3454,7 @@ body.nav-open::after {
   .current-price { font-size: 0.95rem; }
   .product-sizes { gap: 0.3rem; flex-wrap: wrap; }
   .size-option   { padding: 0.25rem 0.5rem; font-size: 0.7rem; min-height: 30px; }
-  .add-cart-btn  { padding: 0.5rem 0.7rem; font-size: 0.78rem; min-height: 36px; }
+  .add-cart-btn  { padding: 0.5rem 0.7rem; font-size: 0.78rem; min-height: 40px; }
   .product-footer { gap: 0.4rem; }
 
   /* ── Cart: bottom sheet ── */
@@ -3592,6 +3489,16 @@ body.nav-open::after {
   .cart-footer { padding: 1rem 1.2rem; }
   .cart-item   { gap: 0.75rem; }
   .cart-item-img { width: 60px; height: 60px; border-radius: 10px; }
+  /* Cart items: animate from below (bottom sheet context, not from right) */
+  .cart-sidebar.active .cart-item {
+    animation: cartItemRise 0.45s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes cartItemRise {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Qty buttons: 44px touch target */
+  .qty-btn { min-width: 44px; min-height: 44px; }
 
   /* ── Auth modal: bottom sheet ── */
   .auth-overlay {
@@ -3616,12 +3523,11 @@ body.nav-open::after {
     border-radius: 3px;
     margin: 0.7rem auto 1rem;
   }
-  /* close button: right-aligned row, doesn't overlap handle */
+  /* close button: keep absolute but shift below the handle pill */
   .auth-modal .close-btn {
-    position: static !important;
-    display: block;
-    margin-left: auto;
-    margin-bottom: 0.5rem;
+    position: absolute !important;
+    top: 1.1rem !important;
+    right: 1.2rem !important;
   }
 
   /* ── Quick View: bottom sheet ── */
@@ -3737,6 +3643,52 @@ body.nav-open::after {
   .products-grid { gap: 0.5rem; }
   .logo { font-size: 1.15rem; }
   #authContainer .btn-primary { font-size: 0.72rem; padding: 0.4rem 0.65rem; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOUCH DEVICE — disable hover transforms (prevent sticky lift after tap)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (hover: none) {
+  .product-card:hover        { transform: none; box-shadow: var(--shadow-sm); }
+  .product-card:hover .product-image-wrap img { transform: none; filter: none; }
+  .product-card:hover .product-image-wrap::after { opacity: 0; }
+  .product-card:hover::before { opacity: 0; }
+  .icon-btn:hover            { transform: none; background: rgba(255,255,255,0.8); color: var(--text-primary); }
+  .btn-primary:hover         { transform: none; }
+  .btn-secondary:hover       { transform: none; }
+  .btn-outline:hover         { transform: none; }
+  .feature-card:hover        { transform: none; }
+  .payment-icon:hover        { transform: none; }
+  .nav-user-btn:hover        { transform: none; }
+  .wishlist-btn:hover        { transform: none; }
+  .add-cart-btn:hover        { transform: none; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE NAV — dark backdrop overlay when open
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+body.nav-open {
+  overflow: hidden;
+}
+body.nav-open::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 997;
+  background: rgba(0,0,0,0.4);
+  animation: pageFadeIn 0.25s ease both;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PROFILE DROPDOWN — prevent overflow on narrow screens
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 480px) {
+  .profile-dropdown {
+    right: 0;
+    min-width: unset;
+    width: calc(100vw - 2rem);
+    max-width: 320px;
+  }
 }
 
 /* --- Respect reduced motion --- */
