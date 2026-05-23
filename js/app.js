@@ -846,7 +846,7 @@ const App = {
       key:       window._rzpKey,
       amount:    total * 100,
       currency:  'INR',
-      name:      'SoleCraft',
+      name:      'NawabiShoes',
       description: 'Premium Footwear Order',
       prefill:   { name: user.name, email: user.email, contact: user.phone || '' },
       theme:     { color: '#d4a04d' },
