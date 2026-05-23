@@ -3346,6 +3346,165 @@ body { animation: pageFadeIn 0.6s ease-out both; }
   transform: translateY(0);
 }
 
+/* ==========================================================================
+   MOBILE RESPONSIVE FIXES
+   ========================================================================== */
+
+/* --- Mobile nav slide-down menu --- */
+.nav-links.mobile-open {
+  display: flex !important;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border-top: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 16px 40px rgba(15,15,26,0.1);
+  padding: 1rem 5%;
+  gap: 0;
+  animation: mobileNavIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
+  z-index: 999;
+}
+.nav-links.mobile-open li a {
+  display: block;
+  padding: 0.85rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  letter-spacing: 0.06em;
+}
+.nav-links.mobile-open li:last-child a { border-bottom: none; }
+@keyframes mobileNavIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Hamburger → X transition */
+.mobile-menu-btn.open i::before { content: '\f00d'; }
+
+@media (max-width: 768px) {
+
+  /* Announce bar — thinner on mobile */
+  .announce-bar { padding: 0.45rem 0; font-size: 0.7rem; }
+
+  /* Hero: scale down the big Zara heading */
+  .hero-content h1 {
+    font-size: clamp(2.4rem, 11vw, 4rem);
+    line-height: 1;
+  }
+  .hero-content p { font-size: 0.88rem; max-width: 100%; }
+  .hero-hindi      { font-size: 0.82rem; }
+
+  /* Hero buttons: stack on very small screens */
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .hero-buttons .btn { width: 100%; max-width: 280px; justify-content: center; }
+
+  /* Reduce section vertical padding */
+  .section { padding: 3.5rem 4%; }
+
+  /* Filter tabs: horizontal scroll strip */
+  .filter-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.4rem;
+    padding-bottom: 0.4rem;
+  }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+  .filter-tab { flex-shrink: 0; padding: 0.45rem 0.9rem; font-size: 0.72rem; }
+
+  /* Section header: tighten */
+  .section-header { gap: 0.8rem; margin-bottom: 1.5rem; }
+  .section-title  { font-size: 1.4rem; }
+
+  /* Product cards: 2 cols on mobile, 1 on tiny */
+  .products-grid { gap: 0.8rem; }
+  .product-card  { border-radius: 14px; }
+
+  /* Cart sidebar full-screen on mobile */
+  .cart-sidebar { width: 100% !important; max-width: 100%; }
+
+  /* Auth modal: full screen feel */
+  .auth-overlay { padding: 0; align-items: flex-end; }
+  .auth-modal   {
+    border-radius: 24px 24px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 100%;
+    animation: mobileSheetIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes mobileSheetIn {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  /* WhatsApp & Back-to-top: prevent overlap */
+  #whatsappBtn   { bottom: 4.5rem; right: 1rem; width: 48px; height: 48px; font-size: 1.3rem; }
+  .back-to-top   { bottom: 1rem;  right: 1rem; }
+
+  /* Trust strip: 2-column grid on mobile */
+  .trust-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    padding: 1rem 4%;
+    text-align: center;
+  }
+  .trust-item   { justify-content: center; font-size: 0.72rem; }
+  .trust-divider{ display: none; }
+
+  /* QV modal full-screen sheet */
+  .qv-overlay { padding: 0; align-items: flex-end; }
+  .qv-modal   {
+    border-radius: 24px 24px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    grid-template-columns: 1fr;
+  }
+  .qv-image-col { border-radius: 24px 24px 0 0; }
+  .qv-image-col img { min-height: 220px; }
+  .qv-info-col  { padding: 1.5rem 1.2rem; }
+
+  /* Hero eyebrow: smaller text */
+  .hero-eyebrow { font-size: 0.62rem; letter-spacing: 0.15em; }
+
+  /* Page loader logo: smaller */
+  .loader-logo { font-size: 1.7rem; }
+
+  /* Countdown badge: ensure it fits */
+  .card-countdown { font-size: 0.6rem; padding: 0.18rem 0.45rem; }
+}
+
+@media (max-width: 480px) {
+  /* Single column products */
+  .products-grid { grid-template-columns: 1fr; }
+
+  /* Nav icons: hide labels */
+  #authContainer .btn span { display: none; }
+
+  /* Hero: even tighter */
+  .hero { padding-top: 5.5rem; }
+  .hero-content h1 { font-size: clamp(2rem, 13vw, 3rem); }
+
+  /* Section: minimal padding */
+  .section { padding: 2.8rem 3.5%; }
+
+  /* Features bar: 1 col */
+  .features-bar { grid-template-columns: 1fr; }
+
+  /* Trust strip: 1 col on very small */
+  .trust-strip { grid-template-columns: 1fr; }
+}
+
 /* --- Respect reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
