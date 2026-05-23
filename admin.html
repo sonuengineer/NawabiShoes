@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SoleCraft | Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Admin-specific overrides */
+    .status-select:focus {
+      border-color: var(--primary) !important;
+      outline: none;
+    }
+    .admin-sidebar::-webkit-scrollbar { width: 4px; }
+    .admin-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .admin-sidebar-footer {
+      padding: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .admin-sidebar-footer .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+  <!-- ============================================
+       ADMIN LAYOUT
+       ============================================ -->
+  <div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-header">
+        <div class="logo">SoleCraft</div>
+        <p>Admin Dashboard</p>
+      </div>
+
+      <nav class="admin-nav">
+        <button class="admin-nav-item active" data-page="dashboard" onclick="AdminApp.showPage('dashboard')">
+          <i class="fas fa-chart-pie"></i> Dashboard
+        </button>
+        <button class="admin-nav-item" data-page="products" onclick="AdminApp.showPage('products')">
+          <i class="fas fa-box"></i> Products
+        </button>
+        <button class="admin-nav-item" data-page="orders" onclick="AdminApp.showPage('orders')">
+          <i class="fas fa-truck"></i> Orders
+        </button>
+        <button class="admin-nav-item" data-page="customers" onclick="AdminApp.showPage('customers')">
+          <i class="fas fa-users"></i> Customers
+        </button>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--primary-gradient);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.9rem;" id="adminAvatar">A</div>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;color:white;" id="adminName">Admin</div>
+            <div style="font-size:0.75rem;color:#718096;">Administrator</div>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" onclick="AdminApp.logout()" style="color:#a0aec0;justify-content:center;">
+          <i class="fas fa-sign-out-alt"></i> Back to Store
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <h2 id="pageTitle">Dashboard</h2>
+        <a href="index.html" class="btn btn-sm btn-ghost" style="gap:0.5rem;">
+          <i class="fas fa-arrow-left"></i> View Store
+        </a>
+      </div>
+
+      <div id="adminContent">
+
+        <!-- ============================================
+             DASHBOARD PAGE
+             ============================================ -->
+        <div class="admin-page active" id="dashboardPage">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon gold"><i class="fas fa-box"></i></div>
+              </div>
+              <h3 id="statTotalProducts">0</h3>
+              <p>Total Products</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon green"><i class="fas fa-shopping-cart"></i></div>
+              </div>
+              <h3 id="statTotalOrders">0</h3>
+              <p>Total Orders</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon blue"><i class="fas fa-users"></i></div>
+              </div>
+              <h3 id="statTotalCustomers">0</h3>
+              <p>Total Customers</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon purple"><i class="fas fa-rupee-sign"></i></div>
+              </div>
+              <h3 id="statTotalRevenue">₹0</h3>
+              <p>Total Revenue</p>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
+            <div>
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+                  </thead>
+                  <tbody id="recentOrdersBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h4 style="margin-bottom:1rem;font-size:1.1rem;">📊 Products by Category</h4>
+              <div id="categoryStats"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             PRODUCTS PAGE
+             ============================================ -->
+        <div class="admin-page" id="productsPage">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+            <div class="search-bar" style="margin-bottom:0;flex:1;max-width:400px;">
+              <input type="text" id="adminSearchInput" placeholder="Search products..." onkeyup="AdminApp.searchAdminProducts()">
+              <button onclick="AdminApp.searchAdminProducts()"><i class="fas fa-search"></i></button>
+            </div>
+            <button class="btn btn-primary" onclick="AdminApp.openAddProductModal()">
+              <i class="fas fa-plus"></i> Add Product
+            </button>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Original</th>
+                  <th>Badge</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ============================================
+             ORDERS PAGE
+             ============================================ -->
+        <div class="admin-page" id="ordersPage">
+          <p class="page-description">Manage all customer orders. Update order status as they progress.</p>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Email</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ============================================
+             CUSTOMERS PAGE
+             ============================================ -->
+        <div class="admin-page" id="customersPage">
+          <p class="page-description">View registered customers and their order history.</p>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Orders</th>
+                  <th>Total Spent</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="customersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /adminContent -->
+    </main>
+  </div>
+
+  <!-- ============================================
+       PRODUCT MODAL
+       ============================================ -->
+  <div class="admin-modal-overlay" id="productModalOverlay">
+    <div class="admin-modal">
+      <button class="close-modal" onclick="AdminApp.closeProductModal()"><i class="fas fa-times"></i></button>
+      <h3 id="productModalTitle">Add New Product</h3>
+
+      <form id="productForm" onsubmit="event.preventDefault(); AdminApp.saveProduct();">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" id="prodName" placeholder="e.g. Air Max Pro" required>
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="prodCategory" required>
+              <option value="">Select category</option>
+              <option value="sports">🏃 Sports</option>
+              <option value="casual">👟 Casual</option>
+              <option value="formal">👔 Formal</option>
+              <option value="boots">🥾 Boots</option>
+              <option value="sandals">🩴 Sandals</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price (₹) *</label>
+            <input type="number" id="prodPrice" placeholder="e.g. 4999" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Original Price (₹)</label>
+            <input type="number" id="prodOriginalPrice" placeholder="e.g. 7999" min="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Image URL *</label>
+          <input type="url" id="prodImage" placeholder="https://images.unsplash.com/..." required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Badge (optional)</label>
+            <input type="text" id="prodBadge" placeholder="e.g. BESTSELLER, NEW, SALE, HOT, LIMITED">
+          </div>
+          <div class="form-group">
+            <label>Sizes * (comma separated)</label>
+            <input type="text" id="prodSizes" placeholder="e.g. 7, 8, 9, 10, 11" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="prodDescription" rows="3" placeholder="Product description..."></textarea>
+        </div>
+
+        <div id="productModalError" class="form-error" style="margin-bottom:1rem;"></div>
+
+        <div style="display:flex;gap:1rem;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">
+            <i class="fas fa-save"></i> Save Product
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="AdminApp.closeProductModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================
+       TOAST CONTAINER
+       ============================================ -->
+  <div class="toast-container" id="adminToastContainer"></div>
+
+  <!-- ============================================
+       MOBILE SIDEBAR TOGGLE
+       ============================================ -->
+  <button class="admin-mobile-toggle" id="sidebarToggle" aria-label="Toggle menu">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- ============================================
+       SCRIPTS
+       ============================================ -->
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
