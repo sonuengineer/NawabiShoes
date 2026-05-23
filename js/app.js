@@ -174,7 +174,7 @@ const App = {
         <div class="product-image-wrap">
           <img src="${product.image}" alt="${product.name}" loading="lazy">
           ${secondImg}
-          <button class="qv-trigger" onclick="App.openQuickView(${product.id})">
+          <button class="qv-trigger" onclick="App.openQuickView(${product.id},event)">
             <i class="fas fa-eye" style="margin-right:.4rem;"></i>Quick View
           </button>
         </div>
@@ -917,7 +917,8 @@ const App = {
   // =========================================================================
   // QUICK VIEW MODAL
   // =========================================================================
-  openQuickView(productId) {
+  openQuickView(productId, event) {
+    if (event) event.stopPropagation();
     const product = StorageManager.getProductById(productId);
     if (!product) return;
     this._qvProduct = product;
