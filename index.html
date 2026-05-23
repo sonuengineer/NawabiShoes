@@ -37,6 +37,16 @@
 </head>
 <body class="has-announce">
 
+  <!-- Page Loader -->
+  <div id="pageLoader">
+    <div class="loader-logo">NawabiShoes</div>
+    <div class="loader-tagline">Desi Style · Modern Walk</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- Cursor Spotlight -->
+  <div id="cursorSpot"></div>
+
   <!-- Announcement Bar -->
   <div class="announce-bar">
     <div class="announce-track">
@@ -144,6 +154,7 @@
           <span class="word" style="--d:.18s"><span class="highlight">Style</span></span>
         </h1>
         <p>Desi Style, Modern Walk — where tradition meets trend. Premium footwear from your favourite brands, delivered to your doorstep with secure payments.</p>
+        <span class="hero-hindi">नवाबी अंदाज़, आधुनिक कदम</span>
         <div class="hero-buttons">
           <button class="btn btn-primary btn-lg" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">
             <i class="fas fa-shopping-bag"></i> Shop Now
@@ -165,6 +176,21 @@
       </div>
     </div>
   </section>
+
+  <!-- Trust Strip -->
+  <div class="trust-strip">
+    <div class="trust-item"><span class="trust-flag">🇮🇳</span> Made in India</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-award"></i> Hallmark Quality</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-money-bill-wave"></i> COD Available</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-undo"></i> 7-Day Easy Returns</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-shield-alt"></i> 100% Secure Checkout</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-headset"></i> 24/7 Support</div>
+  </div>
 
   <!-- Features Bar -->
   <div class="features-bar" data-reveal-stagger>
@@ -344,6 +370,42 @@
       <button class="checkout-btn" id="checkoutBtn" onclick="App.checkout()">
         <i class="fas fa-lock"></i> Proceed to Checkout
       </button>
+    </div>
+  </div>
+
+  <!-- WhatsApp Floating Button -->
+  <a id="whatsappBtn" href="https://wa.me/919999999999?text=Hi%20NawabiShoes!%20I%20need%20help%20with%20an%20order." target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+
+  <!-- Quick View Modal -->
+  <div class="qv-overlay" id="qvOverlay" onclick="App.closeQuickView(event)">
+    <div class="qv-modal" id="qvModal">
+      <button class="qv-close" onclick="App.closeQuickView(null)" aria-label="Close"><i class="fas fa-times"></i></button>
+      <div class="qv-image-col" id="qvImageCol">
+        <img id="qvImg" src="" alt="Product">
+        <div class="qv-dots" id="qvDots"></div>
+      </div>
+      <div class="qv-info-col">
+        <div class="qv-category" id="qvCategory"></div>
+        <h2 class="qv-name" id="qvName"></h2>
+        <div class="qv-rating">
+          <span class="stars" id="qvStars"></span>
+          <span id="qvReviews"></span>
+        </div>
+        <div class="qv-price-row">
+          <span class="qv-price" id="qvPrice"></span>
+          <span class="qv-original" id="qvOriginal"></span>
+          <span class="qv-off" id="qvOff"></span>
+        </div>
+        <div>
+          <div class="qv-size-label">Select Size</div>
+          <div class="qv-sizes" id="qvSizes"></div>
+        </div>
+        <button class="qv-add-btn" id="qvAddBtn" onclick="App.qvAddToCart()">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
     </div>
   </div>
 

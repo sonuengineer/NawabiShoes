@@ -23,6 +23,9 @@ const App = {
     this.setupSizeSelection();
     this.setupScrollReveal();
     this.setupHeroParallax();
+    this.setupPageLoader();
+    this.setupCursorSpot();
+    this.startSaleCountdowns();
 
     // Close dropdown on outside click
     document.addEventListener('click', (e) => {
@@ -150,14 +153,25 @@ const App = {
 
     const stars = '★'.repeat(Math.floor(product.rating)) + (product.rating % 1 >= 0.5 ? '½' : '');
 
+    const isSale = product.badge === 'SALE';
+    const images = product.images || [product.image];
+    const secondImg = images.length > 1
+      ? `<img class="product-img-secondary" src="${images[1]}" alt="${product.name} alt view" loading="lazy">`
+      : '';
+
     return `
       <div class="product-card animate-fade-in-up">
         ${product.badge ? `<span class="product-badge ${badgeClass}">${product.badge}</span>` : ''}
+        ${isSale ? `<div class="card-countdown"><i class="fas fa-fire"></i> Ends <span class="cd-time">--:--:--</span></div>` : ''}
         <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="App.toggleWishlistItem(${product.id})" aria-label="Toggle wishlist">
           <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
         </button>
         <div class="product-image-wrap">
           <img src="${product.image}" alt="${product.name}" loading="lazy">
+          ${secondImg}
+          <button class="qv-trigger" onclick="App.openQuickView(${product.id})">
+            <i class="fas fa-eye" style="margin-right:.4rem;"></i>Quick View
+          </button>
         </div>
         <div class="product-info">
           <div class="product-category">${product.category}</div>
@@ -172,14 +186,15 @@ const App = {
             ).join('')}
           </div>
           <div class="product-footer">
-            <div class="price-box">                  <span class="current-price">₹${product.price.toLocaleString('en-IN')}</span>
-                  ${product.originalPrice > product.price ? `
-                    <span class="original-price">₹${product.originalPrice.toLocaleString('en-IN')}</span>
-                    <span class="discount-badge">${discount}% OFF</span>
-                  ` : ''}
+            <div class="price-box">
+              <span class="current-price">₹${product.price.toLocaleString('en-IN')}</span>
+              ${product.originalPrice > product.price ? `
+                <span class="original-price">₹${product.originalPrice.toLocaleString('en-IN')}</span>
+                <span class="discount-badge">${discount}% OFF</span>
+              ` : ''}
             </div>
             <button class="add-cart-btn" onclick="App.addToCart(${product.id})" aria-label="Add to cart">
-              <i class="fas fa-cart-plus"></i> Add
+              <i class="fas fa-cart-plus"></i> <span class="btn-label">Add</span>
             </button>
           </div>
         </div>
@@ -216,41 +231,6 @@ const App = {
   // =========================================================================
   // CART
   // =========================================================================
-  addToCart(productId) {
-    const products = this.getProducts();
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    let cart = StorageManager.getCart();
-    const existingItem = cart.find(item => item.id === productId);
-
-    if (existingItem) {
-      existingItem.quantity = (existingItem.quantity || 1) + 1;
-    } else {
-      cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: 1,
-        selectedSize: this.selectedSizes[productId] || product.sizes[0] || ''
-      });
-    }
-
-    StorageManager.saveCart(cart);
-    this.updateCartUI();
-    this.showToast(`${product.name} added to cart!`, 'success');
-
-    // Animate cart icon
-    const cartIcon = document.querySelector('.fa-shopping-cart');
-    if (cartIcon) {
-      const parent = cartIcon.closest('.icon-btn');
-      if (parent) {
-        parent.style.transform = 'scale(1.3)';
-        setTimeout(() => parent.style.transform = 'scale(1)', 200);
-      }
-    }
-  },
 
   removeFromCart(productId) {
     let cart = StorageManager.getCart();
@@ -695,7 +675,7 @@ const App = {
 
     // Create order
     const order = {
-      id: 'ORD_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+      id: 'ORD_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8).toUpperCase(),
       userId: user?.id || 'guest',
       userName: user?.name || 'Guest',
       userEmail: user?.email || '',
@@ -857,7 +837,7 @@ const App = {
     new Razorpay(options).open();
   },
 
-  _showDemoPayment(total, user) {
+  _showDemoPayment(total, _user) {
     const overlay = document.createElement('div');
     overlay.style.cssText = `position:fixed;inset:0;background:rgba(15,15,26,0.6);backdrop-filter:blur(12px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:pageFadeIn .3s ease`;
     overlay.innerHTML = `
@@ -887,7 +867,7 @@ const App = {
     document.body.appendChild(overlay);
   },
 
-  _processDemoPayment(method, overlay) {
+  _processDemoPayment(_method, overlay) {
     const cart = StorageManager.getCart();
     const subtotal = cart.reduce((s, i) => s + i.price * (i.quantity || 1), 0);
     const total    = subtotal + Math.round(subtotal * 0.18);
@@ -896,12 +876,188 @@ const App = {
     this._placeOrder(cart, total, payId);
   },
 
-  _placeOrder(cart, total, paymentId) {
+  _placeOrder(_cart, total, paymentId) {
     this.handlePaymentSuccess({
       razorpay_payment_id: paymentId,
       razorpay_order_id:   'demo_' + Date.now(),
       razorpay_signature:  'demo'
     }, total);
+  },
+
+  // =========================================================================
+  // PAGE LOADER
+  // =========================================================================
+  setupPageLoader() {
+    const loader = document.getElementById('pageLoader');
+    if (!loader) return;
+    // Hide after 1.3 s (enough for bar animation to finish)
+    setTimeout(() => loader.classList.add('hide'), 1300);
+  },
+
+  // =========================================================================
+  // CURSOR SPOTLIGHT
+  // =========================================================================
+  setupCursorSpot() {
+    const spot = document.getElementById('cursorSpot');
+    if (!spot || window.matchMedia('(pointer:coarse)').matches) {
+      if (spot) spot.remove();
+      return;
+    }
+    document.addEventListener('mousemove', (e) => {
+      spot.style.left = e.clientX + 'px';
+      spot.style.top  = e.clientY + 'px';
+    });
+  },
+
+  // =========================================================================
+  // QUICK VIEW MODAL
+  // =========================================================================
+  openQuickView(productId) {
+    const product = StorageManager.getProductById(productId);
+    if (!product) return;
+    this._qvProduct = product;
+    this._qvSelectedSize = product.sizes[0];
+
+    document.getElementById('qvCategory').textContent = product.category;
+    document.getElementById('qvName').textContent      = product.name;
+    document.getElementById('qvStars').textContent     = '★'.repeat(Math.floor(product.rating)) + (product.rating % 1 >= 0.5 ? '½' : '');
+    document.getElementById('qvReviews').textContent   = `(${product.reviews} reviews)`;
+    document.getElementById('qvPrice').textContent     = '₹' + product.price.toLocaleString('en-IN');
+
+    const origEl = document.getElementById('qvOriginal');
+    const offEl  = document.getElementById('qvOff');
+    if (product.originalPrice > product.price) {
+      origEl.textContent = '₹' + product.originalPrice.toLocaleString('en-IN');
+      offEl.textContent  = Math.round((1 - product.price / product.originalPrice) * 100) + '% OFF';
+      origEl.style.display = offEl.style.display = '';
+    } else {
+      origEl.style.display = offEl.style.display = 'none';
+    }
+
+    // Images + dots
+    const images = product.images || [product.image];
+    const img    = document.getElementById('qvImg');
+    const dots   = document.getElementById('qvDots');
+    img.src = images[0];
+    dots.innerHTML = images.map((_src, i) =>
+      `<button class="qv-dot ${i === 0 ? 'active' : ''}" onclick="App._qvSetImage(${i})"></button>`
+    ).join('');
+    this._qvImages = images;
+
+    // Sizes
+    document.getElementById('qvSizes').innerHTML = product.sizes.map((s, i) =>
+      `<button class="qv-size-btn ${i === 0 ? 'selected' : ''}" onclick="App._qvSelectSize(this,'${s}')">${s}</button>`
+    ).join('');
+
+    // Reset add button
+    const btn = document.getElementById('qvAddBtn');
+    btn.className = 'qv-add-btn';
+    btn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+
+    document.getElementById('qvOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  },
+
+  _qvSetImage(index) {
+    document.getElementById('qvImg').src = this._qvImages[index];
+    document.querySelectorAll('.qv-dot').forEach((d, i) => d.classList.toggle('active', i === index));
+  },
+
+  _qvSelectSize(btn, size) {
+    document.querySelectorAll('.qv-size-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    this._qvSelectedSize = size;
+  },
+
+  qvAddToCart() {
+    if (!this._qvProduct) return;
+    const btn = document.getElementById('qvAddBtn');
+    btn.className = 'qv-add-btn adding';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding…';
+    setTimeout(() => {
+      this.addToCart(this._qvProduct.id, true);
+      btn.className = 'qv-add-btn added';
+      btn.innerHTML = '<i class="fas fa-check"></i> Added to Cart!';
+      setTimeout(() => this.closeQuickView(null), 900);
+    }, 600);
+  },
+
+  closeQuickView(e) {
+    if (e && e.target !== document.getElementById('qvOverlay')) return;
+    document.getElementById('qvOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  },
+
+  // =========================================================================
+  // ADD-TO-CART MICRO-ANIMATION
+  // =========================================================================
+  addToCart(productId, skipAnim) {
+    const product = StorageManager.getProductById(productId);
+    if (!product) return;
+
+    // Animate the button on the card
+    if (!skipAnim) {
+      const btn = document.querySelector(`.add-cart-btn[onclick="App.addToCart(${productId})"]`);
+      if (btn) {
+        btn.classList.add('adding');
+        btn.innerHTML = '<span class="btn-spinner"></span>';
+        setTimeout(() => {
+          btn.classList.remove('adding');
+          btn.classList.add('added');
+          btn.innerHTML = '<span class="btn-label"><i class="fas fa-check"></i></span>';
+          setTimeout(() => {
+            btn.classList.remove('added');
+            btn.innerHTML = '<i class="fas fa-cart-plus"></i> <span class="btn-label">Add</span>';
+          }, 1200);
+        }, 550);
+      }
+    }
+
+    const cart = StorageManager.getCart();
+    const existing = cart.find(i => i.id === productId);
+    if (existing) {
+      existing.quantity = (existing.quantity || 1) + 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+    StorageManager.saveCart(cart);
+    this.updateCartUI();
+
+    // Badge bounce
+    const badge = document.getElementById('cartCount');
+    if (badge) {
+      badge.classList.remove('bounce');
+      void badge.offsetWidth;
+      badge.classList.add('bounce');
+      badge.addEventListener('animationend', () => badge.classList.remove('bounce'), { once: true });
+    }
+
+    this.showToast(`${product.name} added to cart`, 'success');
+  },
+
+  // =========================================================================
+  // SALE COUNTDOWN TIMERS
+  // =========================================================================
+  startSaleCountdowns() {
+    // End time: 24 h from when the user first sees the page (stored in session)
+    let end = parseInt(sessionStorage.getItem('sc_sale_end') || '0');
+    if (!end || end < Date.now()) {
+      end = Date.now() + 24 * 60 * 60 * 1000;
+      sessionStorage.setItem('sc_sale_end', end);
+    }
+    this._saleEnd = end;
+
+    const tick = () => {
+      const diff = Math.max(0, this._saleEnd - Date.now());
+      const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      document.querySelectorAll('.card-countdown .cd-time').forEach(el => {
+        el.textContent = `${h}:${m}:${s}`;
+      });
+    };
+    tick();
+    setInterval(tick, 1000);
   }
 };
 
